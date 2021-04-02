@@ -7,7 +7,7 @@ fun ByteArray.encodeBase45(map: CharArray = CHARSET): String {
     val mapSizeSquared = mapSize * mapSize
     val dataSize = size
     val length = dataSize / 2 * 3 + if (dataSize % 2 != 0) 2 else 0
-    val out = CharArray(length) { '*' }
+    val out = CharArray(length)
     val end = dataSize - dataSize % 2
     var index = 0
     var i = 0
@@ -48,12 +48,15 @@ fun String.decodeAsBase45(map: CharArray = CHARSET): ByteArray {
     while (i < stringLength) {
         if (i < stringLength - 2) {
             val v = map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize + map.indexOf(this[i++]) * mapSizeSquared
+            if (v > 65536) throw IllegalArgumentException("Not a valid base45 string!")
             val y = v % 256
             val x = (v - y) / 256
             out[index++] = x.toByte()
             out[index++] = y.toByte()
         } else {
-            out[index++] = (map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize).toByte()
+            val v = (map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize).toByte()
+            if (v > 65536) throw IllegalArgumentException("Not a valid base45 string!")
+            out[index++] = v
         }
     }
 
