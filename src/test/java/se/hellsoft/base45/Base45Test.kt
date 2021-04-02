@@ -1,6 +1,7 @@
 package se.hellsoft.base45
 
 import org.junit.Test
+import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -8,10 +9,13 @@ import kotlin.test.fail
 internal class Base45Test {
     @Test
     fun testEncodeDecode() {
-        val allBytes = (0..255).map { it.toByte() }.toByteArray()
+        val allBytes = (Byte.MIN_VALUE..Byte.MAX_VALUE).map { it.toByte() }.toByteArray()
         testEncodeDecode(allBytes)
-        val allButLast = (0..254).map { it.toByte() }.toByteArray()
+        val allButLast = (Byte.MIN_VALUE until Byte.MAX_VALUE).map { it.toByte() }.toByteArray()
         testEncodeDecode(allButLast)
+        val sameRandomBytes = ByteArray(65656)
+        Random(123456).nextBytes(sameRandomBytes)
+        testEncodeDecode(sameRandomBytes)
         val singleByte = byteArrayOf(0xf)
         testEncodeDecode(singleByte)
         val twoBytes = byteArrayOf(0xf, 0x0)
@@ -26,23 +30,38 @@ internal class Base45Test {
     }
 
     @Test
+    fun testDecodeEncode() {
+        var encoded = "BB8"
+        var decoded = encoded.decodeAsBase45()
+        assertEquals("BB8", decoded.encodeBase45())
+
+        encoded = "%69 VD92EX0"
+        decoded = encoded.decodeAsBase45()
+        assertEquals("%69 VD92EX0", decoded.encodeBase45())
+
+        encoded = "UJCLQE7W581"
+        decoded = encoded.decodeAsBase45()
+        assertEquals("UJCLQE7W581", decoded.encodeBase45())
+    }
+
+    @Test
     fun testBadInputDecoding() {
         try {
-            ":::".decodeAsBase45()
+            ":::".decodeAsBase45().decodeToString()
             fail("Decoding of bad data should fail!")
         } catch (e: Exception) {
             assertTrue { e is IllegalArgumentException }
             assertEquals("Not a valid base45 string!", e.message)
         }
         try {
-            "xyzzy".decodeAsBase45()
+            "xyzzy".decodeAsBase45().decodeToString()
             fail("Decoding of bad data should fail!")
         } catch (e: Exception) {
             assertTrue { e is IllegalArgumentException }
             assertEquals("Not a valid base45 string!", e.message)
         }
         try {
-            "a".decodeAsBase45()
+            "a".decodeAsBase45().decodeToString()
             fail("Decoding of bad data should fail!")
         } catch (e: Exception) {
             assertTrue { e is IllegalArgumentException }

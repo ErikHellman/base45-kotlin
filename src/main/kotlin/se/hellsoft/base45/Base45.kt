@@ -45,19 +45,23 @@ fun String.decodeAsBase45(map: CharArray = CHARSET): ByteArray {
     var i = 0
     var index = 0
 
-    while (i < stringLength) {
-        if (i < stringLength - 2) {
-            val v = map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize + map.indexOf(this[i++]) * mapSizeSquared
-            if (v > 65536) throw IllegalArgumentException("Not a valid base45 string!")
-            val y = v % 256
-            val x = (v - y) / 256
-            out[index++] = x.toByte()
-            out[index++] = y.toByte()
-        } else {
-            val v = (map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize).toByte()
-            if (v > 65536) throw IllegalArgumentException("Not a valid base45 string!")
-            out[index++] = v
+    try {
+        while (i < stringLength) {
+            if (i < stringLength - 2) {
+                val v = map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize + map.indexOf(this[i++]) * mapSizeSquared
+                if (v !in 0..65792) throw IllegalArgumentException("Not a valid base45 string!")
+                val y = v % 256
+                val x = (v - y) / 256
+                out[index++] = x.toByte()
+                out[index++] = y.toByte()
+            } else {
+                val v = map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize
+                if (v !in 0..65792) throw IllegalArgumentException("Not a valid base45 string!")
+                out[index++] = v.toByte()
+            }
         }
+    } catch (e: StringIndexOutOfBoundsException) {
+        throw IllegalArgumentException("Not a valid base45 string!", e)
     }
 
     return out
