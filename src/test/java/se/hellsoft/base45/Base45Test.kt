@@ -3,6 +3,7 @@ package se.hellsoft.base45
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 internal class Base45Test {
     @Test
@@ -22,6 +23,31 @@ internal class Base45Test {
         testEncodeDecode("AB")
         testEncodeDecode("base-45")
         testEncodeDecode("en längre sträng med konstiga tecken: \u2713\u0606\u0608\u13C1")
+    }
+
+    @Test
+    fun testBadInputDecoding() {
+        try {
+            ":::".decodeAsBase45()
+            fail("Decoding of bad data should fail!")
+        } catch (e: Exception) {
+            assertTrue { e is IllegalArgumentException }
+            assertEquals("Not a valid base45 string!", e.message)
+        }
+        try {
+            "xyzzy".decodeAsBase45()
+            fail("Decoding of bad data should fail!")
+        } catch (e: Exception) {
+            assertTrue { e is IllegalArgumentException }
+            assertEquals("Not a valid base45 string!", e.message)
+        }
+        try {
+            "a".decodeAsBase45()
+            fail("Decoding of bad data should fail!")
+        } catch (e: Exception) {
+            assertTrue { e is IllegalArgumentException }
+            assertEquals("Not a valid base45 string!", e.message)
+        }
     }
 
     private fun testEncodeDecode(testData: String) {
