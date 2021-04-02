@@ -2,9 +2,7 @@ package se.hellsoft.base45
 
 import org.junit.Test
 import kotlin.random.Random
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import kotlin.test.fail
+import kotlin.test.*
 
 internal class Base45Test {
     @Test
@@ -22,6 +20,8 @@ internal class Base45Test {
         testEncodeDecode(twoBytes)
         val threeBytes = byteArrayOf(0xf, 0x9, 0x0)
         testEncodeDecode(threeBytes)
+        val twoBytesMax = byteArrayOf(0xff.toByte(), 0xff.toByte())
+        testEncodeDecode(twoBytesMax)
 
         testEncodeDecode("Hello!!")
         testEncodeDecode("AB")
@@ -67,6 +67,50 @@ internal class Base45Test {
             assertTrue { e is IllegalArgumentException }
             assertEquals("Not a valid base45 string!", e.message)
         }
+    }
+
+    @Test
+    fun testInvalidInputLength() {
+        assertFailsWith<IllegalArgumentException> {
+            "A".decodeAsBase45()
+        }
+    }
+
+    @Test
+    fun testNonAsciiInputCharacter() {
+        assertFailsWith<IllegalArgumentException> {
+            "ÄÄÄ".decodeAsBase45()
+        }
+    }
+
+    @Test
+    fun testInvalidAsciiCharacters() {
+        ('\u0000'..'\u007F')    // All ASCII characters
+            .filter { character -> character !in CHARSET }
+            .forEach { character ->
+                val errorMessage =
+                    "Invalid character (0x${character.toInt().toString(16).padStart(2)}) decoded without error"
+
+                assertFailsWith<IllegalArgumentException>(errorMessage) {
+                    "${character}AB".decodeAsBase45()
+                }
+
+                assertFailsWith<IllegalArgumentException>(errorMessage) {
+                    "A${character}B".decodeAsBase45()
+                }
+
+                assertFailsWith<IllegalArgumentException>(errorMessage) {
+                    "AB${character}".decodeAsBase45()
+                }
+
+                assertFailsWith<IllegalArgumentException>(errorMessage) {
+                    "${character}A".decodeAsBase45()
+                }
+
+                assertFailsWith<IllegalArgumentException>(errorMessage) {
+                    "A${character}".decodeAsBase45()
+                }
+            }
     }
 
     private fun testEncodeDecode(testData: String) {
