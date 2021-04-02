@@ -56,7 +56,7 @@ fun String.decodeAsBase45(map: CharArray = CHARSET): ByteArray {
                 out[index++] = y.toByte()
             } else {
                 val v = map.indexOf(this[i++]) + map.indexOf(this[i++]) * mapSize
-                if (v !in 0..65792) throw IllegalArgumentException("Not a valid base45 string!")
+                if (v !in 0..255) throw IllegalArgumentException("Not a valid base45 string!")
                 out[index++] = v.toByte()
             }
         }
