@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="se.hellsoft.base45.Base45Test" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-04-02T08:52:11" hostname="MacBook-Pro.localdomain" time="0.043">
-  <properties/>
-  <testcase name="testEncodeDecode" classname="se.hellsoft.base45.Base45Test" time="0.043"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
